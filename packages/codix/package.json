@@ -1,6 +1,6 @@
 {
   "name": "@codixjs/codix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "react web framework:react",
   "author": "shenyunjie ",
   "homepage": "https://github.com/cevio/drake/tree/master/packages/react",
@@ -22,7 +22,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@codixjs/router": "^1.0.0",
+    "@codixjs/router": "^1.0.1",
     "mitt": "^3.0.0",
     "path-to-regexp": "^6.2.1"
   },
