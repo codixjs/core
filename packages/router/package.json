@@ -1,0 +1,24 @@
+{
+  "name": "@codixjs/router",
+  "version": "1.0.0",
+  "description": "react web framework:react-router",
+  "author": "shenyunjie ",
+  "homepage": "https://github.com/cevio/drake/tree/master/packages/react-router",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "keywords": [
+    "npm"
+  ],
+  "directories": {
+    "lib": "src"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf ./dist && tsc"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
