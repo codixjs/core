@@ -3,7 +3,8 @@
   "extendsExact": true,
   "compilerOptions": {
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "module": "commonjs"
   },
   "include": [
     "src"
