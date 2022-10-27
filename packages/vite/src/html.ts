@@ -5,7 +5,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Plugin } from 'vite';
 import { TConfigs } from './types';
-import { SSR } from './mode';
+import { KIND, SSR } from './mode';
 import { THtmlProps, ServerSiderRender, THeaderScript } from '@codixjs/server';
 
 const injectionScript: THeaderScript = {
@@ -52,7 +52,6 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
 
   if (SSR) {
     htmlConfigs.props.assets = {
-      headerScripts: [injectionScript],
       bodyScripts: [
         {
           src: options.entries.client,
@@ -62,7 +61,6 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     }
   } else {
     htmlConfigs.props.assets = {
-      headerScripts: [injectionScript],
       bodyScripts: [
         {
           src: options.entries.spa,
@@ -70,6 +68,9 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
         }
       ]
     }
+  }
+  if (!KIND) {
+    htmlConfigs.props.assets.headerScripts = [injectionScript];
   }
   return htmlConfigs;
 }
