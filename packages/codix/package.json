@@ -6,6 +6,8 @@
   "homepage": "https://github.com/cevio/drake/tree/master/packages/react",
   "license": "MIT",
   "main": "./dist/index.js",
+  "module": "./dist/index.es.js",
+  "type": "module",
   "keywords": [
     "npm"
   ],
@@ -16,7 +18,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf ./dist && tsc"
+    "build": "rm -rf ./dist && rollup -c --bundleConfigAsCjs"
   },
   "publishConfig": {
     "access": "public"
