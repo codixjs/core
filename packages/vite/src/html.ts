@@ -1,6 +1,6 @@
 import { createServer } from 'vite';
 import { existsSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Plugin } from 'vite';
@@ -26,19 +26,26 @@ export function createHTMLServer<T extends Record<string, unknown> = {}>(options
   return {
     name: 'codix:html',
     async transformIndexHtml() {
-      const serverFile = resolve(process.cwd(), options.serverRenderFile);
-      if (!existsSync(serverFile)) throw new Error('cannot find server render file:' + serverFile);
-      const currentEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
-      const server = await createServer();
-      const render = await server.ssrLoadModule(serverFile);
-      const htmlComponent = render.default as ReturnType<typeof ServerSiderRender>;
-      const _html = renderToStaticMarkup(createElement(htmlComponent.html, options.props))
-      await server.close();
-      process.env.NODE_ENV = currentEnv;
-      return _html;
+      return compileHTML<T>(options);
     }
   }
+}
+
+export async function compileHTML<T extends Record<string, unknown> = {}>(options: {
+  serverRenderFile: string,
+  props?: THtmlProps<T>,
+}) {
+  const serverFile = resolve(process.cwd(), options.serverRenderFile);
+  if (!existsSync(serverFile)) throw new Error('cannot find server render file:' + serverFile);
+  const currentEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'development';
+  const server = await createServer();
+  const render = await server.ssrLoadModule(serverFile);
+  const htmlComponent = render.default as ReturnType<typeof ServerSiderRender>;
+  const _html = renderToStaticMarkup(createElement(htmlComponent.html, options.props))
+  await server.close();
+  process.env.NODE_ENV = currentEnv;
+  return _html;
 }
 
 export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
@@ -54,7 +61,7 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     htmlConfigs.props.assets = {
       bodyScripts: [
         {
-          src: options.entries.client,
+          src: getAbsoluteURL(options.entries.client),
           type: 'module'
         }
       ]
@@ -63,7 +70,7 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     htmlConfigs.props.assets = {
       bodyScripts: [
         {
-          src: options.entries.spa,
+          src: getAbsoluteURL(options.entries.spa),
           type: 'module'
         }
       ]
@@ -73,4 +80,10 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     htmlConfigs.props.assets.headerScripts = [injectionScript];
   }
   return htmlConfigs;
+}
+
+function getAbsoluteURL(url: string) {
+  const file = resolve(process.cwd(), url);
+  const between = relative(process.cwd(), file);
+  return between.startsWith('/') ? between : '/' + between;
 }
