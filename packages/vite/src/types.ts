@@ -1,5 +1,4 @@
-export interface TConfigs {
-  template: string,
+export interface TConfigs<T extends Record<string, unknown> = {}> {
   entries: {
     spa: string,
     client: string,
@@ -7,4 +6,5 @@ export interface TConfigs {
   },
   skips?: string[],
   rewrites?: Record<string, string>,
+  templateStates?: T,
 }

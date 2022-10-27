@@ -1,13 +1,12 @@
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 import type { Plugin, ViteDevServer } from 'vite';
+import { ServerSiderRender, IncomingRequest } from '@codixjs/server';
+import { resolveHTMLConfigs } from './html';
+import { TConfigs } from './types';
 
-export function createDevelopmentServer(options: {
-  input: string,
-  skips?: string[],
-  rewrites?: Record<string, string>,
-}): Plugin {
-  const file = resolve(process.cwd(), options.input);
+export function createDevelopmentServer(options: TConfigs): Plugin {
+  const file = resolve(process.cwd(), options.entries.server);
   if (!existsSync(file)) throw new Error('cannot find the ssr entry point:' + file);
   options.skips ||= [];
   options.rewrites ||= {};
@@ -26,8 +25,14 @@ export function createDevelopmentServer(options: {
         if (existsSync(resolve(root, url.startsWith('/') ? '.' + url : url))) return next();
         try {
           const renderer = await server.ssrLoadModule(file);
-          if (typeof renderer.default !== 'function') return next();
-          renderer.default(req, res, next);
+          if (typeof renderer.default !== 'object') return next();
+          const result = renderer.default as ReturnType<typeof ServerSiderRender>;
+          if (typeof result.middleware !== 'function') return next();
+          const request = req as IncomingRequest;
+          const props = resolveHTMLConfigs(options).props;
+          request.HTMLAssets = props.assets;
+          request.HTMLStates = props.state;
+          result.middleware(request, res, next);
         } catch(e) {
           server.ssrFixStacktrace(e);
           res.statusCode = 500;

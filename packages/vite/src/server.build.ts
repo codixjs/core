@@ -1,6 +1,5 @@
 import type { Plugin } from 'vite';
 import { OUTPUT_SSR_DICTIONARY } from './mode';
-import { TConfigs } from './types';
 import { resolve } from 'path';
 export function createServerBuilder(file: string): Plugin {
   return {

@@ -4,25 +4,25 @@ import { resolve } from 'path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Plugin } from 'vite';
-import type { FunctionComponent } from 'react';
 import { TConfigs } from './types';
 import { SSR } from './mode';
+import { THtmlProps, ServerSiderRender } from '@codixjs/server';
 
-export function createHTMLServer(options: {
-  html: string,
-  props?: any,
+export function createHTMLServer<T extends Record<string, unknown> = {}>(options: {
+  serverRenderFile: string,
+  props?: THtmlProps<T>,
 }): Plugin {
   return {
     name: 'codix:html',
     async transformIndexHtml() {
-      const htmlFile = resolve(process.cwd(), options.html);
-      if (!existsSync(htmlFile)) throw new Error('cannot find html template:' + htmlFile);
+      const serverFile = resolve(process.cwd(), options.serverRenderFile);
+      if (!existsSync(serverFile)) throw new Error('cannot find server render file:' + serverFile);
       const currentEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
       const server = await createServer();
-      const render = await server.ssrLoadModule(htmlFile);
-      const htmlComponent = render.default as FunctionComponent;
-      const _html = renderToStaticMarkup(createElement(htmlComponent, options.props))
+      const render = await server.ssrLoadModule(serverFile);
+      const htmlComponent = render.default as ReturnType<typeof ServerSiderRender>;
+      const _html = renderToStaticMarkup(createElement(htmlComponent.html, options.props))
       await server.close();
       process.env.NODE_ENV = currentEnv;
       return _html;
@@ -30,14 +30,24 @@ export function createHTMLServer(options: {
   }
 }
 
-export function resolveHTMLConfigs(options: TConfigs) {
-  const htmlConfigs = {
-    html: options.template,
-    props: null,
+// headerScripts: [
+//   {
+//     src: undefined,
+//     type: 'module',
+//     content: `import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$ = () => {};window.$RefreshSig$ = () => (type) => type;window.__vite_plugin_react_preamble_installed__ = true`,
+//   }
+// ],
+export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
+  const htmlConfigs: { serverRenderFile: string, props: THtmlProps<T> } = {
+    serverRenderFile: options.entries.server,
+    props: {
+      state: options.templateStates,
+      assets: {}
+    },
   }
 
   if (SSR) {
-    htmlConfigs.props = {
+    htmlConfigs.props.assets = {
       bodyScripts: [
         {
           src: options.entries.spa,
@@ -46,14 +56,7 @@ export function resolveHTMLConfigs(options: TConfigs) {
       ]
     }
   } else {
-    htmlConfigs.props = {
-      // headerScripts: [
-      //   {
-      //     src: undefined,
-      //     type: 'module',
-      //     content: `import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$ = () => {};window.$RefreshSig$ = () => (type) => type;window.__vite_plugin_react_preamble_installed__ = true`,
-      //   }
-      // ],
+    htmlConfigs.props.assets = {
       bodyScripts: [
         {
           src: options.entries.client,

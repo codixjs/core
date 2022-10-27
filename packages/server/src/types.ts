@@ -14,16 +14,20 @@ export interface TAssets {
   headerCsses?: string[];
   bodyScripts?: (string | THeaderScript)[];
 }
-export interface THtmlProps<T extends Record<string, unknown>> {
+export interface THtmlProps<T extends Record<string, unknown> = {}> {
   assets: TAssets,
   state?: T
 }
-export interface ServerSiderRenderOptions<T, U extends Record<string, unknown>> {
+export interface ServerSiderRenderOptions<T, U extends Record<string, unknown> = {}> {
   html: FunctionComponent<THtmlProps<U>>,
   routers: (app: Application<HistoryMode>) => T, 
-  states: () => Promise<THtmlProps<U>>,
   onAllReady?: (req: IncomingMessage, res: ServerResponse, object: T) => void; 
   urlFilter?: (url: string) => string,
 }
 
-export type THTML<T extends Record<string, unknown>> = FunctionComponent<THtmlProps<T>>;
+export type THTML<T extends Record<string, unknown> = {}> = FunctionComponent<THtmlProps<T>>;
+
+export interface IncomingRequest<T extends Record<string, unknown> = {}> extends IncomingMessage {
+  HTMLAssets?: TAssets,
+  HTMLStates?: T
+}

@@ -7,17 +7,13 @@ import { createClientBuilder } from './client.build';
 import { createServerBuilder } from './server.build';
 import type { Plugin } from 'vite';
 
-export default function createCodixServer(options: TConfigs) {
+export default function createCodixServer<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
   const plugins: Plugin[] = [
     createHTMLServer(resolveHTMLConfigs(options)),
   ];
 
   if (SSR) {
-    plugins.push(createDevelopmentServer({
-      input: options.entries.server,
-      skips: options.skips,
-      rewrites: options.rewrites,
-    }))
+    plugins.push(createDevelopmentServer(options))
   }
 
   switch (KIND) {
