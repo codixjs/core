@@ -6,7 +6,18 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { Plugin } from 'vite';
 import { TConfigs } from './types';
 import { SSR } from './mode';
-import { THtmlProps, ServerSiderRender } from '@codixjs/server';
+import { THtmlProps, ServerSiderRender, THeaderScript } from '@codixjs/server';
+
+const injectionScript: THeaderScript = {
+  src: undefined,
+  type: 'module',
+  content: `
+  import RefreshRuntime from '/@react-refresh';
+  RefreshRuntime.injectIntoGlobalHook(window);
+  window.$RefreshReg$ = () => {};
+  window.$RefreshSig$ = () => (type) => type;
+  window.__vite_plugin_react_preamble_installed__ = true`,
+}
 
 export function createHTMLServer<T extends Record<string, unknown> = {}>(options: {
   serverRenderFile: string,
@@ -41,6 +52,7 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
 
   if (SSR) {
     htmlConfigs.props.assets = {
+      headerScripts: [injectionScript],
       bodyScripts: [
         {
           src: options.entries.client,
@@ -50,18 +62,7 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     }
   } else {
     htmlConfigs.props.assets = {
-      headerScripts: [
-        {
-          src: undefined,
-          type: 'module',
-          content: `
-          import RefreshRuntime from '/@react-refresh';
-          RefreshRuntime.injectIntoGlobalHook(window);
-          window.$RefreshReg$ = () => {};
-          window.$RefreshSig$ = () => (type) => type;
-          window.__vite_plugin_react_preamble_installed__ = true`,
-        }
-      ],
+      headerScripts: [injectionScript],
       bodyScripts: [
         {
           src: options.entries.spa,

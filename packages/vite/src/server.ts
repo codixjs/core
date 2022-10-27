@@ -1,4 +1,4 @@
-import { existsSync } from 'fs';
+import { existsSync, statSync } from 'fs';
 import { resolve } from 'path';
 import type { Plugin, ViteDevServer } from 'vite';
 import { ServerSiderRender, IncomingRequest } from '@codixjs/server';
@@ -22,7 +22,11 @@ export function createDevelopmentServer(options: TConfigs): Plugin {
           console.log('[vite:codix:server:skip]', url);
           return next();
         }
-        if (existsSync(resolve(root, url.startsWith('/') ? '.' + url : url))) return next();
+        const _file = resolve(root, url.startsWith('/') ? '.' + url : url);
+        if (existsSync(_file)) {
+          const st = statSync(_file);
+          if (st.isFile()) return next();
+        }
         try {
           const renderer = await server.ssrLoadModule(file);
           if (typeof renderer.default !== 'object') return next();
