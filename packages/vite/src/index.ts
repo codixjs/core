@@ -10,9 +10,9 @@ import type { Plugin } from 'vite';
 export default function createCodixServer<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
   const plugins: Plugin[] = [];
 
-  console.log('项目环境变量：')
-  console.log('项目模式：', SSR ? 'SSR' : 'SPA')
-  console.log('编译模式：', KIND ? KIND.toUpperCase() : 'SPA');
+  // console.log('项目环境变量：')
+  // console.log('项目模式：', SSR ? 'SSR' : 'SPA')
+  // console.log('编译模式：', KIND ? KIND.toUpperCase() : 'SPA');
 
   if (SSR) {
     plugins.push(createDevelopmentServer(options));

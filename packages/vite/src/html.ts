@@ -30,13 +30,6 @@ export function createHTMLServer<T extends Record<string, unknown> = {}>(options
   }
 }
 
-// headerScripts: [
-//   {
-//     src: undefined,
-//     type: 'module',
-//     content: `import RefreshRuntime from '/@react-refresh';RefreshRuntime.injectIntoGlobalHook(window);window.$RefreshReg$ = () => {};window.$RefreshSig$ = () => (type) => type;window.__vite_plugin_react_preamble_installed__ = true`,
-//   }
-// ],
 export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
   const htmlConfigs: { serverRenderFile: string, props: THtmlProps<T> } = {
     serverRenderFile: options.entries.server,
@@ -57,6 +50,18 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     }
   } else {
     htmlConfigs.props.assets = {
+      headerScripts: [
+        {
+          src: undefined,
+          type: 'module',
+          content: `
+          import RefreshRuntime from '/@react-refresh';
+          RefreshRuntime.injectIntoGlobalHook(window);
+          window.$RefreshReg$ = () => {};
+          window.$RefreshSig$ = () => (type) => type;
+          window.__vite_plugin_react_preamble_installed__ = true`,
+        }
+      ],
       bodyScripts: [
         {
           src: options.entries.spa,
