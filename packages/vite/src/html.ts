@@ -50,7 +50,7 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     htmlConfigs.props.assets = {
       bodyScripts: [
         {
-          src: options.entries.spa,
+          src: options.entries.client,
           type: 'module'
         }
       ]
@@ -59,7 +59,7 @@ export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(optio
     htmlConfigs.props.assets = {
       bodyScripts: [
         {
-          src: options.entries.client,
+          src: options.entries.spa,
           type: 'module'
         }
       ]
