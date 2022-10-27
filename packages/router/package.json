@@ -5,7 +5,10 @@
   "author": "shenyunjie ",
   "homepage": "https://github.com/cevio/drake/tree/master/packages/react-router",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "npm"
   ],

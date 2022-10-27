@@ -48,18 +48,22 @@ export function useAsyncCallback<T>(callback: () => Promise<T>, defaultValue?: T
     setData,
     execute() {
       setLoading(true);
-      callback()
-        .then(data => startTransition(() => {
-          setData(data);
-          setSuccess(true);
-        }))
-        .catch(e => startTransition(() => {
-          setError(e);
-          setSuccess(false);
-        }))
-        .finally(() => startTransition(() => {
-          setLoading(false);
-        }))
+      return callback()
+        .then(data => {
+          startTransition(() => {
+            setData(data);
+            setSuccess(true);
+          })
+          return data;
+        })
+        .catch(e => {
+          startTransition(() => {
+            setError(e);
+            setSuccess(false);
+          })
+          return Promise.reject(e);
+        })
+        .finally(() => startTransition(() => setLoading(false)))
     }
   }
 }

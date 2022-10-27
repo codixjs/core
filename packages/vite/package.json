@@ -1,9 +1,9 @@
 {
-  "name": "@codixjs/codix",
-  "version": "1.0.1",
-  "description": "react web framework:react",
+  "name": "@codixjs/vite",
+  "version": "1.0.0",
+  "description": "react web framework:vite",
   "author": "shenyunjie ",
-  "homepage": "https://github.com/cevio/drake/tree/master/packages/react",
+  "homepage": "https://github.com/cevio/drake/tree/master/packages/vite",
   "license": "MIT",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -25,9 +25,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@codixjs/router": "^1.0.1",
-    "mitt": "^3.0.0",
-    "path-to-regexp": "^6.2.1"
+    "vite": "^3.1.8"
   },
   "peerDependencies": {
     "@types/react": "^18.0.21",

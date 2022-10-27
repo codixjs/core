@@ -9,6 +9,7 @@ export interface THeaderScript {
   type?: string;
   crossOrigin?: 'anonymous' | 'use-credentials';
   src: string;
+  content?: string;
 }
 export interface TAssets {
   headerScripts?: (string | THeaderScript)[];
