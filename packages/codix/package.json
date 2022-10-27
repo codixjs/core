@@ -6,9 +6,6 @@
   "homepage": "https://github.com/cevio/drake/tree/master/packages/react",
   "license": "MIT",
   "main": "./dist/index.js",
-  "exports": "./dist/index.js",
-  "type": "module",
-  "types": "./dist/index.d.ts",
   "keywords": [
     "npm"
   ],
