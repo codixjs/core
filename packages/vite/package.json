@@ -1,6 +1,6 @@
 {
   "name": "@codixjs/vite",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "react web framework:vite",
   "author": "shenyunjie ",
   "homepage": "https://github.com/cevio/drake/tree/master/packages/vite",
@@ -22,7 +22,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@codixjs/server": "^1.0.4",
+    "@codixjs/server": "^1.0.5",
     "vite": "^3.1.8"
   },
   "peerDependencies": {
