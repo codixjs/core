@@ -1,34 +1,17 @@
-import { FunctionComponent, createElement, Fragment } from 'react';
+import { createElement, Fragment } from 'react';
 import { IncomingMessage, ServerResponse } from 'http';
 import { ServerSideHistoryMode } from './mode';
 import { Exception } from './exception';
-import { Application, HistoryMode } from '@codixjs/codix';
+import { Application } from '@codixjs/codix';
 import { renderToPipeableStream, RenderToPipeableStreamOptions } from 'react-dom/server';
+import { ServerSiderRenderOptions } from './types';
 
-export interface THeaderScript {
-  type?: string;
-  crossOrigin?: 'anonymous' | 'use-credentials';
-  src: string;
-  content?: string;
-}
-export interface TAssets {
-  headerScripts?: (string | THeaderScript)[];
-  headerPreloadScripts?: string[];
-  headerCsses?: string[];
-  bodyScripts?: (string | THeaderScript)[];
-}
-export interface THtmlProps<T extends Record<string, unknown>> {
-  assets: TAssets,
-  state?: T
-}
-export interface ServerSiderRenderOptions<T, U extends Record<string, unknown>> {
-  html: FunctionComponent<THtmlProps<U>>,
-  routers: (app: Application<HistoryMode>) => T, 
-  states: () => Promise<THtmlProps<U>>,
-  onAllReady?: (req: IncomingMessage, res: ServerResponse, object: T) => void; 
-  urlFilter?: (url: string) => string,
-}
-
+export * from './scripts';
+export * from './preloads';
+export * from './css';
+export * from './types';
+export * from './exception';
+export * from './mode';
 export function ServerSiderRender<T, U extends Record<string, unknown>>(options: ServerSiderRenderOptions<T, U>) {
   return (req: IncomingMessage, res: ServerResponse, next: Function) => {
     const app = new Application(ServerSideHistoryMode);
