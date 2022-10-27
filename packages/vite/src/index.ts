@@ -7,7 +7,16 @@ import { createClientBuilder } from './client.build';
 import { createServerBuilder } from './server.build';
 import { Plugin } from 'vite';
 
-export default async function createCodixServer<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
+export * from './client.build';
+export * from './html';
+export * from './mode';
+export * from './server';
+export * from './server.build';
+export * from './spa.build';
+export * from './types';
+export * from './assets';
+
+export default function createCodixServer<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
   const plugins: Plugin[] = [];
   if (SSR) {
     plugins.push(createDevelopmentServer(options));
