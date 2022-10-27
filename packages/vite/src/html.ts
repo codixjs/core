@@ -25,6 +25,11 @@ export function createHTMLServer<T extends Record<string, unknown> = {}>(options
 }): Plugin {
   return {
     name: 'codix:html',
+    async load(id: string) {
+      if (id === resolve(process.cwd(), 'index.html')) {
+        return compileHTML<T>(options);
+      }
+    },
     async transformIndexHtml() {
       return compileHTML<T>(options);
     }
