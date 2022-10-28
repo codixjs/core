@@ -3,21 +3,21 @@ import { existsSync } from 'fs';
 import { resolve } from 'path';
 // eg.
 // getAssets('src/entries/client.tsx', '/Users/evioshen/code/github/pjblog/test/dist/ssr/client');
-export function getAssets(inputClientFile: string, outputClientDir: string): TAssets {
+export async function getAssets(inputClientFile: string, outputClientDir: string): Promise<TAssets> {
   const headerScripts: THeaderScript[] = [];
   const headerPreloadScripts: string[] = [];
   const headerCsses: string[] = [];
   if (!existsSync(outputClientDir)) throw new Error('miss client output dictionary');
   const manifest_file = resolve(outputClientDir, 'manifest.json');
   if (!existsSync(manifest_file)) throw new Error('miss client manifest.json');
-  const manifest = require(manifest_file);
+  const manifest = getManifest(manifest_file);
   if (!manifest[inputClientFile]) throw new Error('Not Found');
   headerScripts.push({
     type: 'module',
     crossOrigin: 'anonymous',
-    src: manifest[outputClientDir].file.startsWith('/') 
-      ? manifest[outputClientDir].file 
-      : '/' + manifest[outputClientDir].file,
+    src: manifest[inputClientFile].file.startsWith('/') 
+      ? manifest[inputClientFile].file 
+      : '/' + manifest[inputClientFile].file,
   });
   const imports = manifest[inputClientFile].imports || [];
   headerPreloadScripts.push(...imports.map((s: string) => {
@@ -37,5 +37,14 @@ export function getAssets(inputClientFile: string, outputClientDir: string): TAs
     headerScripts,
     headerPreloadScripts,
     headerCsses,
+  }
+}
+
+async function getManifest(path: string) {
+  try {
+    return require(path);
+  } catch (e) {
+    const result = await import(path, { assert: { type: 'json' } });
+    return result.default;
   }
 }
