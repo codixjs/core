@@ -10,7 +10,7 @@ export async function getAssets(inputClientFile: string, outputClientDir: string
   if (!existsSync(outputClientDir)) throw new Error('miss client output dictionary');
   const manifest_file = resolve(outputClientDir, 'manifest.json');
   if (!existsSync(manifest_file)) throw new Error('miss client manifest.json');
-  const manifest = getManifest(manifest_file);
+  const manifest = await getManifest(manifest_file);
   if (!manifest[inputClientFile]) throw new Error('Not Found');
   headerScripts.push({
     type: 'module',
