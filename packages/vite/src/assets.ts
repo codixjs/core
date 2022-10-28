@@ -1,33 +1,37 @@
 import { TAssets, THeaderScript } from '@codixjs/server';
-import { OUTPUT_SSR_CLIENT_DICTIONARY } from './mode';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
-// file: options.client short address
-export function getAssets(file: string): TAssets {
+// eg.
+// getAssets('src/entries/client.tsx', '/Users/evioshen/code/github/pjblog/test/dist/ssr/client');
+export function getAssets(inputClientFile: string, outputClientDir: string): TAssets {
   const headerScripts: THeaderScript[] = [];
   const headerPreloadScripts: string[] = [];
   const headerCsses: string[] = [];
-  const clientDir = OUTPUT_SSR_CLIENT_DICTIONARY;
-  if (!existsSync(clientDir)) throw new Error('miss client output dictionary');
-  const manifest_file = resolve(clientDir, 'manifest.json');
+  if (!existsSync(outputClientDir)) throw new Error('miss client output dictionary');
+  const manifest_file = resolve(outputClientDir, 'manifest.json');
   if (!existsSync(manifest_file)) throw new Error('miss client manifest.json');
   const manifest = require(manifest_file);
-  file = file.startsWith('/') ? file.substring(1) : file;
-  if (!manifest[file]) throw new Error('Not Found');
+  if (!manifest[inputClientFile]) throw new Error('Not Found');
   headerScripts.push({
     type: 'module',
     crossOrigin: 'anonymous',
-    src: manifest[file].file.startsWith('/') ? manifest[file].file : '/' + manifest[file].file,
+    src: manifest[outputClientDir].file.startsWith('/') 
+      ? manifest[outputClientDir].file 
+      : '/' + manifest[outputClientDir].file,
   });
-  const imports = manifest[file].imports || [];
+  const imports = manifest[inputClientFile].imports || [];
   headerPreloadScripts.push(...imports.map((s: string) => {
     if (manifest[s]) {
-      return manifest[s].file.startsWith('/') ? manifest[s].file : '/' + manifest[s].file;
+      return manifest[s].file.startsWith('/') 
+        ? manifest[s].file 
+        : '/' + manifest[s].file;
     }
   }).filter(Boolean));
-  const csses = manifest[file].css || [];
+  const csses = manifest[inputClientFile].css || [];
   headerCsses.push(...csses.map((c: string) => {
-    return c.startsWith('/') ? c : '/' + c;
+    return c.startsWith('/') 
+      ? c 
+      : '/' + c;
   }))
   return {
     headerScripts,
