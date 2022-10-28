@@ -1,7 +1,4 @@
 import { FunctionComponent } from "react";
-import { Application } from "./core";
-import { HistoryMode } from "./mode";
-import { Path } from "./path";
 
 export interface RequestState {
   hash: string,
