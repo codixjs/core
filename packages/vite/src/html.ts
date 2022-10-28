@@ -31,7 +31,9 @@ export function createHTMLServer<T extends Record<string, unknown> = {}>(options
       }
     },
     async transformIndexHtml() {
-      return compileHTML<T>(options);
+      if (KIND !== 'spa') {
+        return compileHTML<T>(options);
+      }
     }
   }
 }
