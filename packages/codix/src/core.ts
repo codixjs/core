@@ -70,13 +70,16 @@ export class Application<H extends HistoryMode> {
     return this;
   }
 
-  public bind<T extends object = {}>(path: string, ...components: (MiddlewareConpact | FunctionComponent)[]) {
+  public path<T extends object = {}>(path: string): Path<T> {
+    return new Path<T>(path, this);
+  }
+
+  public useComponents<T extends object = {}>(pather: Path<T>, ...components: (MiddlewareConpact | FunctionComponent)[]) {
     if (!components.length) throw new Error('Bind function: components.length must be >= 1, now is ' + components.length);
     const _components = components.map(component => {
       if (typeof component === 'function') return withMiddleware(component);
       return component;
     });
-    const pather = new Path<T>(path);
     const middlewares = [...this.middlewares, ..._components].filter(Boolean);
     const VirtualDispatcher = () => {
       let i = middlewares.length;
@@ -86,8 +89,12 @@ export class Application<H extends HistoryMode> {
       }
       return next;
     }
-    this.router.on(path, VirtualDispatcher);
+    this.router.on(pather.url, VirtualDispatcher);
     return pather;
+  }
+
+  public bind<T extends object = {}>(path: string, ...components: (MiddlewareConpact | FunctionComponent)[]) {
+    return this.path<T>(path).use(...components);
   }
 
   public match(url: string): boolean {
