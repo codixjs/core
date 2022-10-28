@@ -12,7 +12,7 @@ export * from './css';
 export * from './types';
 export * from './exception';
 export * from './mode';
-export function ServerSiderRender<T, U extends Record<string, unknown> = {}>(options: ServerSiderRenderOptions<T, U>) {
+export function ServerSiderRender<T extends Record<string, any> = {}, U extends Record<string, unknown> = {}>(options: ServerSiderRenderOptions<T, U>) {
   return {
     html: options.html,
     middleware: (req: IncomingRequest<U>, res: ServerResponse, next: Function) => {
@@ -55,7 +55,7 @@ export function ServerSiderRender<T, U extends Record<string, unknown> = {}>(opt
       }
       const headers = req.headers as Record<string, string>;
       const { RunTime } = app.build();
-      const page = createElement(RunTime, { href: url, headers }, createElement(Fragment));
+      const page = createElement(RunTime, { href: url, headers, pathes: injectResults }, createElement(Fragment));
       const root = createElement(options.html, { assets: req.HTMLAssets, state: req.HTMLStates }, page);
       const stream = renderToPipeableStream(root, configs);
     }

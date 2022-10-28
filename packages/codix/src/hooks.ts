@@ -41,3 +41,10 @@ export function useRequestState() {
   if (!request) return null;
   return request.state;
 }
+
+export function useRequestRouter<T extends Record<string, any> = {}>(key: keyof T) {
+  const request = useContext(RequestContext);
+  if (!request) return null;
+  const pathes = request.pathes as T;
+  return pathes[key];
+}

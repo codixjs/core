@@ -45,6 +45,7 @@ export class Application<H extends HistoryMode> {
     href: string, 
     headers: Record<string, string> = {}, 
     state: Record<string, string> = {},
+    pathes: Record<string, any> = {},
   ) {
     const url = new URL(href);
     const query: Record<string, string> = {};
@@ -59,6 +60,7 @@ export class Application<H extends HistoryMode> {
       hostname: url.hostname,
       headers,
       state,
+      pathes,
     }
     return {
       matched, context,
@@ -106,10 +108,11 @@ export class Application<H extends HistoryMode> {
     const RunTime = (props: PropsWithChildren<{ 
       href: string, 
       headers?: Record<string, string>, 
-      state?: Record<string, string> 
+      state?: Record<string, string> ,
+      pathes?: Record<string, any>,
     }>) => {
       const { matched, context } = useMemo(() => {
-        return this.createNewContext(props.href, props.headers, props.state);
+        return this.createNewContext(props.href, props.headers, props.state, props.pathes);
       }, [props.href, props.headers, props.state]);
       return createElement(
         RequestContext.Provider, 
@@ -119,7 +122,7 @@ export class Application<H extends HistoryMode> {
           : props.children
       )
     }
-    const Bootstrap = (props: React.PropsWithChildren<{}>) => {
+    const Bootstrap = (props: React.PropsWithChildren<{ pathes?: Record<string, any> }>) => {
       const [href, setHref] = useState<string>(this.history.getLocation());
       const _href = useDeferredValue(href);
       useEffect(() => {
@@ -132,7 +135,7 @@ export class Application<H extends HistoryMode> {
           feedback();
         }
       }, []);
-      return createElement(RunTime, { href: _href }, props.children);
+      return createElement(RunTime, { href: _href, pathes: props.pathes }, props.children);
     }
     return {
       Bootstrap,
