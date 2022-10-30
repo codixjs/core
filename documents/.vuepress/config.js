@@ -16,12 +16,7 @@ module.exports = {
     nav: [
       { text: '主页', link: '/' },
       { text: '指南', link: '/guide' },
-      { text: 'API', link: '/api' },
-    ],
-    sidebar: [
-      '/',
-      '/guide.md',
-      '/api.md',
+      { text: 'API', link: '/apis' },
     ],
     // 假定是 GitHub. 同时也可以是一个完整的 GitLab URL
     repo: 'codixjs/core',

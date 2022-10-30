@@ -1,7 +1,7 @@
 ---
 sidebar: auto
 sidebarDepth: 2
-next: api.md
+next: apis.md
 prev: false
 ---
 
