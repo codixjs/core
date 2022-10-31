@@ -53,6 +53,7 @@ export function useAsyncCallback<T>(callback: () => Promise<T>, defaultValue?: T
           startTransition(() => {
             setData(data);
             setSuccess(true);
+            setError(null);
           })
           return data;
         })
@@ -60,6 +61,7 @@ export function useAsyncCallback<T>(callback: () => Promise<T>, defaultValue?: T
           startTransition(() => {
             setError(e);
             setSuccess(false);
+            setData(defaultValue);
           })
           return Promise.reject(e);
         })
