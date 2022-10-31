@@ -7,6 +7,7 @@ import type { Plugin } from 'vite';
 import { TConfigs } from './types';
 import { KIND, SSR } from './mode';
 import { THtmlProps, ServerSiderRender, THeaderScript } from '@codixjs/server';
+import pretty from 'pretty';
 
 const injectionScript: THeaderScript = {
   src: undefined,
@@ -54,7 +55,8 @@ async function compileHTMLWithServer<T extends Record<string, unknown> = {}>(
 ) {
   const render = await server.ssrLoadModule(serverFile);
   const htmlComponent = render.default as ReturnType<typeof ServerSiderRender>;
-  return renderToStaticMarkup(createElement(htmlComponent.html, props));
+  const html = renderToStaticMarkup(createElement(htmlComponent.html, props));
+  return pretty(html);
 }
 
 export async function compileHTMLWhenBuild<T extends Record<string, unknown> = {}>(options: {
