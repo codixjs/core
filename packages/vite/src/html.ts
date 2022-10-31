@@ -1,4 +1,4 @@
-import { createServer } from 'vite';
+import { createServer, ViteDevServer } from 'vite';
 import { existsSync } from 'fs';
 import { resolve, relative } from 'path';
 import { createElement } from 'react';
@@ -23,36 +23,49 @@ export function createHTMLServer<T extends Record<string, unknown> = {}>(options
   serverRenderFile: string,
   props?: THtmlProps<T>,
 }): Plugin {
+  let template: string = undefined;
   return {
     name: 'codix:html',
+    enforce: 'pre',
     async load(id: string) {
       if (id === resolve(process.cwd(), 'index.html')) {
-        return compileHTML<T>(options);
+        return await compileHTMLWhenBuild(options);
       }
     },
     async transformIndexHtml() {
       if (KIND !== 'spa') {
-        return compileHTML<T>(options);
+        if (template) return template;
+        return await compileHTMLWhenBuild(options);
+      }
+    },
+    async configureServer(server) {
+      if (!template) {
+        template = await compileHTMLWithServer(server, options.serverRenderFile, options.props);
       }
     }
   }
 }
 
-export async function compileHTML<T extends Record<string, unknown> = {}>(options: {
+async function compileHTMLWithServer<T extends Record<string, unknown> = {}>(
+  server: ViteDevServer, 
+  serverFile: string, 
+  props?: THtmlProps<T>,
+) {
+  const render = await server.ssrLoadModule(serverFile);
+  const htmlComponent = render.default as ReturnType<typeof ServerSiderRender>;
+  return renderToStaticMarkup(createElement(htmlComponent.html, props));
+}
+
+export async function compileHTMLWhenBuild<T extends Record<string, unknown> = {}>(options: {
   serverRenderFile: string,
   props?: THtmlProps<T>,
 }) {
   const serverFile = resolve(process.cwd(), options.serverRenderFile);
   if (!existsSync(serverFile)) throw new Error('cannot find server render file:' + serverFile);
-  const currentEnv = process.env.NODE_ENV;
-  process.env.NODE_ENV = 'development';
-  const server = await createServer();
-  const render = await server.ssrLoadModule(serverFile);
-  const htmlComponent = render.default as ReturnType<typeof ServerSiderRender>;
-  const _html = renderToStaticMarkup(createElement(htmlComponent.html, options.props))
-  await server.close();
-  process.env.NODE_ENV = currentEnv;
-  return _html;
+  const server = await createServer({
+    mode: 'development'
+  });
+  return compileHTMLWithServer(server, serverFile, options.props)
 }
 
 export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
