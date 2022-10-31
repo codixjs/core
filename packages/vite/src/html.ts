@@ -34,14 +34,15 @@ export function createHTMLServer<T extends Record<string, unknown> = {}>(options
     },
     async transformIndexHtml() {
       if (KIND !== 'spa') {
-        if (template) return template;
-        return await compileHTMLWhenBuild(options);
+        return template;
       }
     },
     async configureServer(server) {
-      if (!template) {
+      server.middlewares.use(async (req, res, next) => {
+        if (template) return next();
         template = await compileHTMLWithServer(server, options.serverRenderFile, options.props);
-      }
+        next();
+    })
     }
   }
 }
@@ -62,10 +63,12 @@ export async function compileHTMLWhenBuild<T extends Record<string, unknown> = {
 }) {
   const serverFile = resolve(process.cwd(), options.serverRenderFile);
   if (!existsSync(serverFile)) throw new Error('cannot find server render file:' + serverFile);
-  const server = await createServer({
-    mode: 'development'
-  });
-  return compileHTMLWithServer(server, serverFile, options.props)
+  console.log('Rendering Template ...');
+  const server = await createServer({ mode: 'development' });
+  await server.listen(9517);
+  const html = await compileHTMLWithServer(server, serverFile, options.props);
+  await server.close();
+  return html;
 }
 
 export function resolveHTMLConfigs<T extends Record<string, unknown> = {}>(options: TConfigs<T>) {
