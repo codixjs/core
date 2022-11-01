@@ -5,16 +5,18 @@ import { useClient } from './provider';
 export function useAsync<T>(id: string, callback: () => Promise<T>, deps?: React.DependencyList) {
   const client = useClient();
   const node = client.add<T>(id).read(callback);
-  const skip = useRef(node.type === 'server');
   node.type = 'client';
-  return createAsync(skip, node, callback, deps);
+  return createAsync(node, callback, deps);
 }
 
-function createAsync<T>(skip: React.MutableRefObject<boolean>, node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
+function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
   const [data, setData] = useState(node.value);
   const [error, setError] = useState(node.error);
   const [success, setSuccess] = useState(node.success);
   const [loading, setLoading] = useState(false);
+
+  const first = useRef(true);
+
   const execute = () => {
     setLoading(true);
     node.reset();
@@ -33,12 +35,14 @@ function createAsync<T>(skip: React.MutableRefObject<boolean>, node: Node<T>, ca
   }, [node]);
 
   useEffect(() => {
-    if (skip.current) {
-      skip.current = false;
-    } else {
+    if (!first.current && deps.length) {
       execute();
     }
   }, deps);
+
+  useEffect(() => {
+    first.current = false;
+  }, []);
 
   return {
     data, error, success, loading,
