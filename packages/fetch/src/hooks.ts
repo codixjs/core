@@ -9,11 +9,16 @@ export function useAsync<T>(id: string, callback: () => Promise<T>) {
   return createAsync(node, callback);
 }
 
-function createAsync<T>(node: Node<T>, callback: () => Promise<T>) {
+function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: any[] = []) {
   const [data, setData] = useState(node.value);
   const [error, setError] = useState(node.error);
   const [success, setSuccess] = useState(node.success);
   const [loading, setLoading] = useState(false);
+  const execute = () => {
+    setLoading(true);
+    node.reset();
+    node.read(callback);
+  }
 
   useEffect(() => {
     const handler = () => startTransition(() => {
@@ -26,14 +31,17 @@ function createAsync<T>(node: Node<T>, callback: () => Promise<T>) {
     return () => node.e.off('done', handler);
   }, [node]);
 
+  useEffect(() => {
+    if (node.count === 0) {
+      node.count++;
+    } else {
+      execute();
+    }
+  }, deps);
+
   return {
     data, error, success, loading,
-    setData,
-    execute() {
-      setLoading(true);
-      node.reset();
-      node.read(callback);
-    }
+    setData, execute,
   }
 }
 
