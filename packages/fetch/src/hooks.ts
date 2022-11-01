@@ -1,15 +1,15 @@
-import { startTransition, useEffect, useState } from 'react';
+import React, { startTransition, useEffect, useState } from 'react';
 import { Node } from './client';
 import { useClient } from './provider';
 
-export function useAsync<T>(id: string, callback: () => Promise<T>) {
+export function useAsync<T>(id: string, callback: () => Promise<T>, deps?: React.DependencyList) {
   const client = useClient();
   const node = client.add<T>(id).read(callback);
   node.type = 'client';
-  return createAsync(node, callback);
+  return createAsync(node, callback, deps);
 }
 
-function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: any[] = []) {
+function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
   const [data, setData] = useState(node.value);
   const [error, setError] = useState(node.error);
   const [success, setSuccess] = useState(node.success);
