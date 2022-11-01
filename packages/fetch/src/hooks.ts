@@ -1,16 +1,16 @@
-import React, { startTransition, useEffect, useState } from 'react';
+import React, { startTransition, useEffect, useRef, useState } from 'react';
 import { Node } from './client';
 import { useClient } from './provider';
 
 export function useAsync<T>(id: string, callback: () => Promise<T>, deps?: React.DependencyList) {
   const client = useClient();
   const node = client.add<T>(id).read(callback);
-  const skip = node.type === 'server';
+  const skip = useRef(node.type === 'server');
   node.type = 'client';
   return createAsync(skip, node, callback, deps);
 }
 
-function createAsync<T>(skip: boolean, node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
+function createAsync<T>(skip: React.MutableRefObject<boolean>, node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
   const [data, setData] = useState(node.value);
   const [error, setError] = useState(node.error);
   const [success, setSuccess] = useState(node.success);
@@ -33,7 +33,9 @@ function createAsync<T>(skip: boolean, node: Node<T>, callback: () => Promise<T>
   }, [node]);
 
   useEffect(() => {
-    if (!skip) {
+    if (skip.current) {
+      skip.current = false;
+    } else {
       execute();
     }
   }, deps);
