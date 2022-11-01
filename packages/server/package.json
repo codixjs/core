@@ -1,6 +1,6 @@
 {
   "name": "@codixjs/server",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "react web framework:react-ssr",
   "author": "shenyunjie ",
   "homepage": "https://github.com/cevio/drake/tree/master/packages/react-ssr",
@@ -26,7 +26,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@codixjs/codix": "^1.0.10"
+    "@codixjs/codix": "^1.0.11"
   },
   "peerDependencies": {
     "@types/react": "^18.0.21",
