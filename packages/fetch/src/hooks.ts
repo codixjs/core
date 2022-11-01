@@ -37,7 +37,7 @@ function createAsync<T>(node: Node<T>, callback: () => Promise<T>) {
   }
 }
 
-export function useAsyncCallback<T>(callback: () => Promise<T>, defaultValue?: T) {
+export function useAsyncCallback<T, U extends any[] = []>(callback: (...args: U) => Promise<T>, defaultValue?: T) {
   const [data, setData] = useState(defaultValue);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(true);
@@ -46,9 +46,9 @@ export function useAsyncCallback<T>(callback: () => Promise<T>, defaultValue?: T
   return {
     data, error, success, loading,
     setData,
-    execute() {
+    execute(...args: U) {
       setLoading(true);
-      return callback()
+      return callback(...args)
         .then(data => {
           startTransition(() => {
             setData(data);
