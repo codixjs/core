@@ -5,11 +5,12 @@ import { useClient } from './provider';
 export function useAsync<T>(id: string, callback: () => Promise<T>, deps?: React.DependencyList) {
   const client = useClient();
   const node = client.add<T>(id).read(callback);
+  const skip = node.type === 'server';
   node.type = 'client';
-  return createAsync(node, callback, deps);
+  return createAsync(skip, node, callback, deps);
 }
 
-function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
+function createAsync<T>(skip: boolean, node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
   const [data, setData] = useState(node.value);
   const [error, setError] = useState(node.error);
   const [success, setSuccess] = useState(node.success);
@@ -32,9 +33,7 @@ function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: React.D
   }, [node]);
 
   useEffect(() => {
-    if (node.count === 0) {
-      node.count++;
-    } else {
+    if (!skip) {
       execute();
     }
   }, deps);

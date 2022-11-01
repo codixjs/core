@@ -10,7 +10,6 @@ export class Node<T = unknown> {
   public error: any = undefined;
   public timestamp = Date.now();
   public type: 'server' | 'client' = 'server';
-  public count = 0;
 
   public read(callback: () => Promise<T>) {
     if (this.status === 2) return this;
@@ -19,7 +18,6 @@ export class Node<T = unknown> {
       return this;
     }
     this.status = 1;
-    this.count++;
     this.promise = callback();
     this.promise.then((data) => {
       this.value = data;
