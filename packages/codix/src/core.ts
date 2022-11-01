@@ -76,22 +76,25 @@ export class Application<H extends HistoryMode> {
     return new Path<T>(path, this);
   }
 
+  public compile(middlewares: MiddlewareConpact[]) {
+    let i = middlewares.length;
+    let next: React.ReactNode = createElement(Fragment);
+    while (i--) {
+      next = createElement(middlewares[i].component, middlewares[i].props, next);
+    }
+    return next;
+  }
+
   public useComponents<T extends object = {}>(pather: Path<T>, ...components: (MiddlewareConpact | FunctionComponent)[]) {
     if (!components.length) throw new Error('Bind function: components.length must be >= 1, now is ' + components.length);
     const _components = components.map(component => {
       if (typeof component === 'function') return withMiddleware(component);
       return component;
     });
-    const middlewares = [...this.middlewares, ..._components].filter(Boolean);
-    const VirtualDispatcher = () => {
-      let i = middlewares.length;
-      let next: React.ReactNode = createElement(Fragment);
-      while (i--) {
-        next = createElement(middlewares[i].component, middlewares[i].props, next);
-      }
-      return next;
+    const createVirtualDispatcher = () => {
+      return [...this.middlewares, ..._components].filter(Boolean);
     }
-    this.router.on(pather.url, VirtualDispatcher);
+    this.router.on(pather.url, createVirtualDispatcher);
     return pather;
   }
 
@@ -114,11 +117,12 @@ export class Application<H extends HistoryMode> {
       const { matched, context } = useMemo(() => {
         return this.createNewContext(props.href, props.headers, props.state, props.pathes);
       }, [props.href, props.headers, props.state]);
+      const middlewares = matched.handler() as MiddlewareConpact[];
       return createElement(
         RequestContext.Provider, 
         { value: context }, 
         !!matched 
-          ? createElement(matched.handler as FunctionComponent)
+          ? this.compile(middlewares)
           : props.children
       )
     }
