@@ -22,21 +22,35 @@ export class Path<T extends object = {}> {
     return this.application.useComponents<T>(this, ...components);
   }
 
-  public redirect(props?: T): void {
-    return redirectRouter<T>(this, props);
+  public redirect(
+    props?: T, 
+    querys?: Record<string, string>
+  ): void {
+    return redirectRouter<T>(this, props, querys);
   }
 
-  public replace(props?: T): void {
-    return replaceRouter<T>(this, props);
+  public replace(
+    props?: T, 
+    querys?: Record<string, string>
+  ): void {
+    return replaceRouter<T>(this, props, querys);
   }
 }
 
-export function redirectRouter<T extends object>(object: Path<T>, props?: T) {
+export function redirectRouter<T extends object>(
+  object: Path<T>, 
+  props?: T, 
+  querys?: Record<string, string>
+) {
   const url = object.toString(props);
-  return redirect(url);
+  return redirect(url, querys);
 }
 
-export function replaceRouter<T extends object>(object: Path<T>, props?: T) {
+export function replaceRouter<T extends object>(
+  object: Path<T>, 
+  props?: T, 
+  querys?: Record<string, string>
+) {
   const url = object.toString(props);
-  return replace(url);
+  return replace(url, querys);
 }
