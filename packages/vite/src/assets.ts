@@ -3,7 +3,7 @@ import { existsSync } from 'fs';
 import { resolve } from 'path';
 // eg.
 // getAssets('src/entries/client.tsx', '/Users/evioshen/code/github/pjblog/test/dist/ssr/client');
-export async function getAssets(inputClientFile: string, outputClientDir: string): Promise<TAssets> {
+export async function getAssets(prefix: string, inputClientFile: string, outputClientDir: string): Promise<TAssets> {
   const headerScripts: THeaderScript[] = [];
   const headerPreloadScripts: string[] = [];
   const headerCsses: string[] = [];
@@ -15,23 +15,17 @@ export async function getAssets(inputClientFile: string, outputClientDir: string
   headerScripts.push({
     type: 'module',
     crossOrigin: 'anonymous',
-    src: manifest[inputClientFile].file.startsWith('/') 
-      ? manifest[inputClientFile].file 
-      : '/' + manifest[inputClientFile].file,
+    src: formatPath(prefix, manifest[inputClientFile].file),
   });
   const imports = manifest[inputClientFile].imports || [];
   headerPreloadScripts.push(...imports.map((s: string) => {
     if (manifest[s]) {
-      return manifest[s].file.startsWith('/') 
-        ? manifest[s].file 
-        : '/' + manifest[s].file;
+      return formatPath(prefix, manifest[s].file);
     }
   }).filter(Boolean));
   const csses = manifest[inputClientFile].css || [];
   headerCsses.push(...csses.map((c: string) => {
-    return c.startsWith('/') 
-      ? c 
-      : '/' + c;
+    return formatPath(prefix, c);
   }))
   return {
     headerScripts,
@@ -47,4 +41,13 @@ async function getManifest(path: string) {
     const result = await import(path, { assert: { type: 'json' } });
     return result.default;
   }
+}
+
+function formatPath(prefix: string, file: string) {
+  return resolve(
+    prefix,
+    file.startsWith('/') 
+      ? '.' + file
+      : file
+  )
 }

@@ -16,6 +16,7 @@ export * from './mode';
 export function ServerSiderRender<T extends Record<string, any> = {}, U extends Record<string, unknown> = {}>(options: ServerSiderRenderOptions<T, U>) {
   return {
     html: options.html,
+    prefix: options.prefix,
     middleware: (req: IncomingRequest<U>, res: ServerResponse, next: Function) => {
       const app = new Application(ServerSideHistoryMode, options.prefix || '/');
       app.host = req.headers.host;
