@@ -56,8 +56,10 @@ export class Client extends Map<string, Node> {
       node.value = state[key].d;
       node.status = 2;
       node.success = state[key].s;
-      node.error = new Error(state[key].e);
-      node.error.code = state[key].c;
+      if (state[key].e) {
+        node.error = new Error(state[key].e);
+        node.error.code = state[key].c;
+      }
     }
   }
 
