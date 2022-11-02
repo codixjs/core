@@ -12,6 +12,7 @@ export class Application<H extends HistoryMode> {
   private readonly prefix: string;
   private readonly history: H;
   private readonly middlewares: MiddlewareConpact[] = [];
+  public host: string = '';
   private readonly router = new Router({
     caseSensitive: true,
     ignoreTrailingSlash: true,

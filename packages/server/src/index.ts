@@ -1,10 +1,10 @@
 import { createElement, Fragment } from 'react';
-import { IncomingMessage, ServerResponse } from 'http';
 import { ServerSideHistoryMode } from './mode';
-import { Exception } from './exception';
+import { LocationException } from './exception';
 import { Application } from '@codixjs/codix';
 import { renderToPipeableStream, RenderToPipeableStreamOptions } from 'react-dom/server';
 import { ServerSiderRenderOptions, IncomingRequest } from './types';
+import type { IncomingMessage, ServerResponse } from 'http';
 
 export * from './scripts';
 export * from './preloads';
@@ -12,11 +12,13 @@ export * from './css';
 export * from './types';
 export * from './exception';
 export * from './mode';
+
 export function ServerSiderRender<T extends Record<string, any> = {}, U extends Record<string, unknown> = {}>(options: ServerSiderRenderOptions<T, U>) {
   return {
     html: options.html,
     middleware: (req: IncomingRequest<U>, res: ServerResponse, next: Function) => {
-      const app = new Application(ServerSideHistoryMode);
+      const app = new Application(ServerSideHistoryMode, options.prefix || '/');
+      app.host = req.headers.host;
       const injectResults = options.routers(app);
   
       let url = formatRequestLocation(req);
@@ -25,6 +27,7 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
       }
   
       if (!app.match(url)) return next();
+      
       let errored = false;
       const configs: RenderToPipeableStreamOptions = {
         onShellReady() {
@@ -32,17 +35,17 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
           res.setHeader("Content-type", "text/html; charset=utf-8");
           stream.pipe(res);
         },
-        onError(e: Exception) {
-          switch (e.httpCode) {
+        onError(e: LocationException) {
+          switch (e.code) {
             case 301:
             case 302:
               res.setHeader('Location', e.url);
               res.setHeader('Content-type', 'text/html; charset=utf-8');
-              res.statusCode = e.httpCode;
+              res.statusCode = e.code;
               res.end(e.message);
               break;
             default:
-              res.statusCode = 500;
+              res.statusCode = typeof e.code === 'number' ? e.code : 500;
               res.end(e.message);
           }
           errored = true;

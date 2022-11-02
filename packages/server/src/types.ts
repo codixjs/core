@@ -19,6 +19,7 @@ export interface THtmlProps<T extends Record<string, unknown> = {}> {
   state?: T
 }
 export interface ServerSiderRenderOptions<T, U extends Record<string, unknown> = {}> {
+  prefix?: string,
   html: FunctionComponent<THtmlProps<U>>,
   routers: (app: Application<HistoryMode>) => T, 
   onAllReady?: (req: IncomingMessage, res: ServerResponse, object: T) => void; 

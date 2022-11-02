@@ -57,6 +57,7 @@ export class Client extends Map<string, Node> {
       node.status = 2;
       node.success = state[key].s;
       node.error = new Error(state[key].e);
+      node.error.code = state[key].c;
     }
   }
 
@@ -70,6 +71,7 @@ export class Client extends Map<string, Node> {
         state[key].d = node.value;
       } else {
         state[key].e = node.error?.message;
+        state[key].c = node.error?.code;
       }
     }
     return state;
