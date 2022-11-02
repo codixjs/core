@@ -118,12 +118,11 @@ export class Application<H extends HistoryMode> {
       const { matched, context } = useMemo(() => {
         return this.createNewContext(props.href, props.headers, props.state, props.pathes);
       }, [props.href, props.headers, props.state]);
-      const middlewares = matched.handler() as MiddlewareConpact[];
       return createElement(
         RequestContext.Provider, 
         { value: context }, 
         !!matched 
-          ? this.compile(middlewares)
+          ? this.compile(matched.handler())
           : props.children
       )
     }
