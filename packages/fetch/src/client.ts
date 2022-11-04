@@ -10,6 +10,7 @@ export class Node<T = unknown> {
   public error: any = undefined;
   public timestamp = Date.now();
   public type: 'server' | 'client' = 'server';
+  private callback: () => Promise<T> = undefined;
 
   public read(callback: () => Promise<T>) {
     if (this.status === 2) return this;
@@ -31,6 +32,7 @@ export class Node<T = unknown> {
       this.promise = undefined;
       this.status = 2;
       this.timestamp = Date.now();
+      this.callback = callback;
       this.e.emit('done');
     })
     if (this.type === 'server') throw this.promise;
@@ -39,6 +41,13 @@ export class Node<T = unknown> {
 
   public reset() {
     this.status = 0;
+  }
+
+  public reload() {
+    if (this.callback) {
+      this.reset();
+      this.read(this.callback);
+    }
   }
 }
 
@@ -77,5 +86,16 @@ export class Client extends Map<string, Node> {
       }
     }
     return state;
+  }
+
+  public reload(...codes: string[]) {
+    let i = codes.length;
+    while (i--) {
+      const code = codes[i];
+      if (this.has(code)) {
+        const chunk = this.get(code);
+        chunk.reload();
+      }
+    }
   }
 }
