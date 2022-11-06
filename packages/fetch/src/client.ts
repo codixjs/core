@@ -16,6 +16,7 @@ export class Node<T = unknown> {
     if (this.status === 2) return this;
     if (this.promise) {
       if (this.type === 'server') throw this.promise;
+      this.callback = callback;
       return this;
     }
     this.status = 1;
@@ -36,6 +37,7 @@ export class Node<T = unknown> {
       this.e.emit('done');
     })
     if (this.type === 'server') throw this.promise;
+    this.callback = callback;
     return this;
   }
 
