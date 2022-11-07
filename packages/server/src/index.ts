@@ -50,11 +50,13 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
               res.end(e.message);
           }
           errored = true;
+          next();
         },
         onAllReady() {
           if (typeof options.onAllReady === 'function' && !errored) {
             options.onAllReady(req, res, injectResults);
           }
+          if (!errored) next();
         }
       }
       const headers = req.headers as Record<string, string>;
