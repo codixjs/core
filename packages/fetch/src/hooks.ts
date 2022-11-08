@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useRef, useState } from 'react';
 import { Node } from './client';
 import { useClient } from './provider';
 
@@ -9,7 +9,7 @@ export function useAsync<T>(id: string, callback: () => Promise<T>, deps?: React
   return createAsync(node, callback, deps);
 }
 
-function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: React.DependencyList = []) {
+function createAsync<T>(node: Node<T>, callback: (old?: T) => Promise<T>, deps: React.DependencyList = []) {
   const [data, setData] = useState(node.value);
   const [error, setError] = useState(node.error);
   const [success, setSuccess] = useState(node.success);
@@ -20,7 +20,7 @@ function createAsync<T>(node: Node<T>, callback: () => Promise<T>, deps: React.D
   const execute = () => {
     setLoading(true);
     node.reset();
-    node.read(callback);
+    node.read(() => callback(data));
   }
 
   useEffect(() => {
