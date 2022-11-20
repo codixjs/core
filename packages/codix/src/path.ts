@@ -24,33 +24,37 @@ export class Path<T extends object = {}> {
 
   public redirect(
     props?: T, 
-    querys?: Record<string, string>
+    querys?: Record<string, string>,
+    hash?: string
   ): void {
-    return redirectRouter<T>(this, props, querys);
+    return redirectRouter<T>(this, props, querys, hash);
   }
 
   public replace(
     props?: T, 
-    querys?: Record<string, string>
+    querys?: Record<string, string>,
+    hash?: string
   ): void {
-    return replaceRouter<T>(this, props, querys);
+    return replaceRouter<T>(this, props, querys, hash);
   }
 }
 
 export function redirectRouter<T extends object>(
   object: Path<T>, 
   props?: T, 
-  querys?: Record<string, string>
+  querys?: Record<string, string>,
+  hash?: string
 ) {
   const url = object.toString(props);
-  return redirect(url, querys);
+  return redirect(url, querys, hash);
 }
 
 export function replaceRouter<T extends object>(
   object: Path<T>, 
   props?: T, 
-  querys?: Record<string, string>
+  querys?: Record<string, string>,
+  hash?: string
 ) {
   const url = object.toString(props);
-  return replace(url, querys);
+  return replace(url, querys, hash);
 }

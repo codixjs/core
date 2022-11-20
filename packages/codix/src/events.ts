@@ -5,13 +5,15 @@ export const eventEmitter = mitt<{
   change: undefined,
 }>();
 
-export function redirect(url: string, querys?: Record<string, string>) {
+export function redirect(url: string, querys?: Record<string, string>, hash?: string) {
   url = url + formatQueries(querys);
+  if (hash) url += '#' + hash;
   eventEmitter.emit('redirect', url);
 }
 
-export function replace(url: string, querys?: Record<string, string>) {
+export function replace(url: string, querys?: Record<string, string>, hash?: string) {
   url = url + formatQueries(querys);
+  if (hash) url += '#' + hash;
   eventEmitter.emit('replace', url);
 }
 
