@@ -17,7 +17,7 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
   return {
     html: options.html,
     prefix: options.prefix,
-    middleware: (req: IncomingRequest<U>, res: ServerResponse, next: (mached: boolean) => void) => {
+    middleware: (req: IncomingRequest<U>, res: ServerResponse, next: (e?: any) => void) => {
       const app = new Application(ServerSideHistoryMode, options.prefix || '/');
       app.host = req.headers.host;
       const injectResults = options.routers(app);
@@ -27,36 +27,36 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
         url = options.urlFilter(url);
       }
   
-      if (!app.match(url)) return next(false);
+      if (!app.match(url)) return next();
       
       let errored = false;
       const configs: RenderToPipeableStreamOptions = {
         onShellReady() {
-          res.statusCode = 200;
+          // res.statusCode = 200;
           res.setHeader("Content-type", "text/html; charset=utf-8");
           stream.pipe(res);
         },
         onError(e: LocationException) {
-          switch (e.code) {
-            case 301:
-            case 302:
-              res.setHeader('Location', e.url);
-              res.setHeader('Content-type', 'text/html; charset=utf-8');
-              res.statusCode = e.code;
-              res.end(e.message);
-              break;
-            default:
-              res.statusCode = typeof e.code === 'number' ? e.code : 500;
-              res.end(e.message);
-          }
+          // switch (e.code) {
+          //   case 301:
+          //   case 302:
+          //     res.setHeader('Location', e.url);
+          //     res.setHeader('Content-type', 'text/html; charset=utf-8');
+          //     res.statusCode = e.code;
+          //     res.end(e.message);
+          //     break;
+          //   default:
+          //     res.statusCode = typeof e.code === 'number' ? e.code : 500;
+          //     res.end(e.message);
+          // }
           errored = true;
-          next(true);
+          next(e);
         },
         onAllReady() {
           if (typeof options.onAllReady === 'function' && !errored) {
             options.onAllReady(req, res, injectResults);
           }
-          if (!errored) next(true);
+          if (!errored) next();
         }
       }
       const headers = req.headers as Record<string, string>;
