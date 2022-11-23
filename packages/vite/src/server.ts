@@ -36,9 +36,9 @@ export function createDevelopmentServer(options: TConfigs): Plugin {
           const props = resolveHTMLConfigs(options).props;
           request.HTMLAssets = props.assets;
           request.HTMLStates = props.state;
-          result.middleware(request, res, (matched) => {
-            if (!matched) return next();
-          });
+          const [matched, stream] = result.middleware(request);
+          if (!matched) return next();
+          stream.pipe(res);
         } catch(e) {
           server.ssrFixStacktrace(e);
           res.statusCode = 500;

@@ -37,7 +37,15 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
         onShellReady: () => stream.pipe(pass),
         onError(e: LocationException) {
           errored = true;
-          pass.emit('error', e);
+          switch (e?.code) {
+            case 301:
+            case 302:
+              pass.write(`<script>window.location.href='${e.url}';</script>`);
+              break;
+            default:
+              pass.write(e.stack);
+              break;
+          }
         },
         onAllReady() {
           if (typeof options.onAllReady === 'function' && !errored) {
