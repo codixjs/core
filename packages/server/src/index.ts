@@ -5,6 +5,7 @@ import { Application } from '@codixjs/codix';
 import { renderToPipeableStream, RenderToPipeableStreamOptions } from 'react-dom/server';
 import { ServerSiderRenderOptions, IncomingRequest } from './types';
 import type { IncomingMessage, ServerResponse } from 'http';
+import { Writable } from 'node:stream';
 
 export * from './scripts';
 export * from './preloads';
@@ -17,7 +18,7 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
   return {
     html: options.html,
     prefix: options.prefix,
-    middleware: (req: IncomingRequest<U>, res: ServerResponse, next: (matched: boolean, e?: any) => void) => {
+    middleware: (req: IncomingRequest<U>, res: ServerResponse, next: (matched: boolean, stream?: Writable) => void) => {
       const app = new Application(ServerSideHistoryMode, options.prefix || '/');
       app.host = req.headers.host;
       const injectResults = options.routers(app);
@@ -28,13 +29,15 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
       }
   
       if (!app.match(url)) return next(false);
+
+      const writeable = new Writable();
       
       let errored = false;
       const configs: RenderToPipeableStreamOptions = {
         onShellReady() {
           // res.statusCode = 200;
-          res.setHeader("Content-type", "text/html; charset=utf-8");
-          stream.pipe(res);
+          // res.setHeader("Content-type", "text/html; charset=utf-8");
+          stream.pipe(writeable);
         },
         onError(e: LocationException) {
           // switch (e.code) {
@@ -50,13 +53,13 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
           //     res.end(e.message);
           // }
           errored = true;
-          next(true, e);
+          // next(true, e);
+          writeable.emit('error', e);
         },
         onAllReady() {
           if (typeof options.onAllReady === 'function' && !errored) {
-            options.onAllReady(req, res, injectResults);
+            options.onAllReady(writeable, injectResults);
           }
-          if (!errored) next(true);
         }
       }
       const headers = req.headers as Record<string, string>;
@@ -64,6 +67,7 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
       const page = createElement(RunTime, { href: url, headers, pathes: injectResults }, createElement(Fragment));
       const root = createElement(options.html, { assets: req.HTMLAssets, state: req.HTMLStates }, page);
       const stream = renderToPipeableStream(root, configs);
+      next(true, writeable);
     }
   }
 }

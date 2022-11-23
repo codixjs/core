@@ -1,6 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Application, HistoryMode } from '@codixjs/codix';
 import { IncomingMessage, ServerResponse } from 'http';
+import { Writable } from 'stream';
 
 export interface THeaderScript {
   type?: string;
@@ -22,7 +23,7 @@ export interface ServerSiderRenderOptions<T, U extends Record<string, unknown> =
   prefix?: string,
   html: FunctionComponent<THtmlProps<U>>,
   routers: (app: Application<HistoryMode>) => T, 
-  onAllReady?: (req: IncomingMessage, res: ServerResponse, object: T) => void; 
+  onAllReady?: (stream: Writable, object: T) => void; 
   urlFilter?: (url: string) => string,
 }
 
