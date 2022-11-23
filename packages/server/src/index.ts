@@ -17,7 +17,7 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
   return {
     html: options.html,
     prefix: options.prefix,
-    middleware: (req: IncomingRequest<U>, res: ServerResponse, next: (e?: any) => void) => {
+    middleware: (req: IncomingRequest<U>, res: ServerResponse, next: (matched: boolean, e?: any) => void) => {
       const app = new Application(ServerSideHistoryMode, options.prefix || '/');
       app.host = req.headers.host;
       const injectResults = options.routers(app);
@@ -27,7 +27,7 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
         url = options.urlFilter(url);
       }
   
-      if (!app.match(url)) return next();
+      if (!app.match(url)) return next(false);
       
       let errored = false;
       const configs: RenderToPipeableStreamOptions = {
@@ -50,13 +50,13 @@ export function ServerSiderRender<T extends Record<string, any> = {}, U extends 
           //     res.end(e.message);
           // }
           errored = true;
-          next(e);
+          next(true, e);
         },
         onAllReady() {
           if (typeof options.onAllReady === 'function' && !errored) {
             options.onAllReady(req, res, injectResults);
           }
-          if (!errored) next();
+          if (!errored) next(true);
         }
       }
       const headers = req.headers as Record<string, string>;
