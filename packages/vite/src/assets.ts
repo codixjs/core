@@ -1,16 +1,17 @@
 import { TAssets, THeaderScript } from '@codixjs/server';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
-// eg.
-// getAssets('src/entries/client.tsx', '/Users/evioshen/code/github/pjblog/test/dist/ssr/client');
-export async function getAssets(prefix: string, inputClientFile: string, outputClientDir: string): Promise<TAssets> {
+
+export async function getAssets(
+  prefix: string, 
+  inputClientFile: string, 
+  outputClientDir: string, 
+  manifest: any
+): Promise<TAssets> {
   const headerScripts: THeaderScript[] = [];
   const headerPreloadScripts: string[] = [];
   const headerCsses: string[] = [];
   if (!existsSync(outputClientDir)) throw new Error('miss client output dictionary');
-  const manifest_file = resolve(outputClientDir, 'manifest.json');
-  if (!existsSync(manifest_file)) throw new Error('miss client manifest.json');
-  const manifest = await getManifest(manifest_file);
   if (!manifest[inputClientFile]) throw new Error('Not Found');
   headerScripts.push({
     type: 'module',
@@ -31,15 +32,6 @@ export async function getAssets(prefix: string, inputClientFile: string, outputC
     headerScripts,
     headerPreloadScripts,
     headerCsses,
-  }
-}
-
-async function getManifest(path: string) {
-  try {
-    return require(path);
-  } catch (e) {
-    const result = await import(path, { assert: { type: 'json' } });
-    return result.default;
   }
 }
 
