@@ -39,14 +39,7 @@ export class Application<H extends HistoryMode> {
   }
 
   private encodePrefix(url: string) {
-    let prefix = this.prefix.startsWith('//') 
-      ? 'http:' + this.prefix 
-      : this.prefix.startsWith('/')
-        ? 'http://codix.com' + this.prefix
-        : this.prefix;
-    if (!prefix.endsWith('/')) prefix = prefix + '/';
-    const uri = new URL(prefix);
-    return uri.pathname + (url.startsWith('/') ? url.substring(1) : url);
+    return this.prefix + (url.startsWith('/') ? url.substring(1) : url);
   }
 
   private createNewContext(
